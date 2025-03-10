@@ -18,7 +18,7 @@ services:
       start_period: 5s
       timeout: 5s
     networks:
-      - localhost
+      - menudigital_network
 
   phpmyadmin:
     image: phpmyadmin/phpmyadmin:latest
@@ -30,7 +30,7 @@ services:
     depends_on:
       - db_container
     networks:
-      - localhost
+      - menudigital_network
 
   api:
     image: lucascarodev/menudigital:main
@@ -51,11 +51,12 @@ services:
       db_container:
         condition: service_healthy
     networks:
-      - localhost
+      - menudigital_network
 
 
 networks:
-  localhost:
+  menudigital_network:
+    name: menudigital_network
     driver: bridge
 
 volumes:
