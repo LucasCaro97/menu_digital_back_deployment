@@ -1,0 +1,68 @@
+version: '3.8'
+
+services:
+  db_container:
+    image: mysql:8.0.33
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_PASSWORD}
+      MYSQL_DATABASE: menudigital
+    ports:
+      - "3308:3306"
+    volumes:
+      - db_data:/var/lib/mysql
+    healthcheck:
+      test: [ "CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${MYSQL_ROOT_PASSWORD}" ]
+      interval: 10s
+      retries: 5
+      start_period: 5s
+      timeout: 5s
+    networks:
+      - localhost
+
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin:latest
+    environment:
+      PMA_HOST: db_container
+      MYSQL_ROOT_PASSWORD: ${MYSQL_PASSWORD}
+    ports:
+      - "8091:80"
+    depends_on:
+      - db_container
+    networks:
+      - localhost
+
+  api:
+    image: lucascarodev/menudigital:main
+    ports:
+      - "8090:8080"
+    volumes:
+      - img_volume:/opt
+    environment:
+      DB_URL: ${DB_URL}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+      rutaimagenes: ${rutaimagenes}
+      usuarioroot: ${usuarioroot}
+      usuariopass: ${usuariopass}
+    env_file:
+      - .env
+    depends_on:
+      db_container:
+        condition: service_healthy
+    networks:
+      - localhost
+
+
+networks:
+  localhost:
+    driver: bridge
+
+volumes:
+  img_volume:
+    driver: local
+  db_data:
+    driver: local
+
+
+
